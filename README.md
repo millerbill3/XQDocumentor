@@ -26,3 +26,4 @@ NOTE: This project is not yet "Bullet Proof". Work still has to be done to ensur
 * Include links to externally referenced variables
 * Links to external modules that reference module functions
 * View to actual code block being referenced
+* Document defined functions even if there is no method documentation
