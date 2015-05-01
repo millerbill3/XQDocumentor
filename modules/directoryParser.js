@@ -1,61 +1,64 @@
 var fs = require("fs"),
-  path = require("path"),
-  s = require("string");
+    path = require("path"),
+    stringUtil = require("string"),
+    util = require("util"),
+    EventEmitter = require("events").EventEmitter,
+    walker = require("filewalker");
 
-module.exports = {
-  walk: function(dir, exclusionDirs, done) {
-    return walk(dir, exclusionDirs, done);
-  }
-}
 
-/**
-Recursively traverses the specified directory and
-excludes 
-**/
-var walk = function(dir, exclusionDirs, done) {
-  var results = [];
-  fs.readdir(dir, function(err, list) {
-    if (err)
-      return done(err);
-    var pending = list.length;
-
-    if (!pending)
-      return done(null, results);
-
-    list.forEach(function(file) {
-      file = dir + '/' + file;
-      fs.stat(file, function(err, stat) {
-        if (stat && stat.isDirectory() && !processExclusionDirectory(exclusionDirs,dir)) {
-          walk(file, exclusionDirs, function(err, res) {
-            results = results.concat(res);
-            if (!--pending)
-              done(null, results);
-          });
-        } else {
-          if (s(file).endsWith(".xqy"))
-            results.push(file);
-          if (!--pending)
-            done(null, results);
-        }
-      });
-    });
-  });
-  return results;
-}
-
-var processExclusionDirectory = function(dirs, path)
-{
-  var found = false;
-  dirs.forEach(function(filePath){
-    if(s(path).contains(filePath)){
-      found = true;
-      return;
+function Walker(){
+    if(false === (this instanceof Walker)) {
+        return new Walker();
     }
-  });
-  console.log(found)
-  return found;
+    EventEmitter.call(this);
 }
 
+util.inherits(Walker, EventEmitter);
+
+
+
+Walker.prototype.walk = function(dir, exclusionDirs, done) {
+    var files_to_return = [];
+    var walkerEmitter = this;
+    console.log();
+    console.log("***************************************");
+    console.log("********* Scanning Directories ********");
+    console.log("***************************************");
+    console.log();
+    walker(dir)
+        .on('dir', function(p) {
+            //console.log('dir:  %s', p);
+        })
+        .on('file', function(p, s, absPath) {
+            if (!processExclusionDirectory(exclusionDirs, absPath) && stringUtil(p).endsWith(".xqy")) {
+                files_to_return.push(absPath);
+            }
+        })
+        .on('error', function(err) {
+            console.error(err);
+        })
+        .on('done', function() {
+            //console.log('%d dirs, %d files, %d bytes', this.dirs, this.files, this.bytes);
+            walkerEmitter.emit("DoneWalking", files_to_return);
+        })
+        .walk();
+
+
+};
+
+
+var processExclusionDirectory = function (dirs, path) {
+    var found = false;
+    dirs.forEach(function (filePath) {
+        if (stringUtil(path).contains(filePath)) {
+            found = true;
+            return;
+        }
+    });
+    //console.log(found)
+    return found;
+};
+module.exports = Walker;
 
 
 

@@ -1,0 +1,78 @@
+doctype html
+html
+    head
+        title= results.FileName
+        <link rel="stylesheet" type="text/css" href="/style.css" />
+    body
+        div.docTitle
+            h1= results.FileName
+            h2= results.FileSystemPath
+        div.index
+            a(href='/') Home
+        unless results.ModuleDescription.namespace == null
+            h3.headerSpan MODULE URI
+            div
+                ul
+                    unless results.ModuleDescription.namespace == null
+                        li <b> Name: </b> #{results.ModuleDescription.namespace.name}
+                    unless results.ModuleDescription.namespace == null
+                        li <b>URI = </b> #{results.ModuleDescription.namespace.uri}
+        h3.headerSpan= "MODULE DESCRIPTION"
+        div= results.ModuleDescription.modDesc
+        ul
+            unless results.ModuleDescription.author == ""
+                li <b> Author: </b> #{results.ModuleDescription.author}
+            unless results.ModuleDescription.version == ""
+                li <b> Version: </b> #{results.ModuleDescription.version}
+            unless results.ModuleDescription.since == ""
+                li <b> Since: </b> #{results.ModuleDescription.since}
+            unless results.ModuleDescription.see == ""
+                li <b> See: </b> #{results.ModuleDescription.see}
+        h3.headerSpan MODULE VARIABLES
+        div.methodDetail
+            ul
+            each val, i in results.Variables
+                li #{val.variable}
+                    unless val.comment == null
+                        ul
+                            li= val.comment
+                hr
+
+        h3.headerSpan NAMESPACE DECLARATIONS
+        div.methodDetail
+            ul
+            unless results.NameSpaceDeclarations.length == 0
+                each val, i in results.NameSpaceDeclarations
+                    li <b>Namespace:</b> #{val.namespace}
+                    li <b>URN:</b> #{val.urn}
+                    hr
+        h3.headerSpan MODULE IMPORTS
+        div.methodDetail
+            ul
+            unless results.Imports == null
+                each val, i in results.Imports
+                    li <b>Namespace:</b> #{val.namespace}
+                    li <b>URN:</b> #{val.urn}
+                    li <b>Location:</b> #{val.location}
+                    hr
+        h3.headerSpan FUNCTIONS
+        each val, i in results.DocumentedMethods
+            li: a(href='##{val.methodName}') #{val.methodName}
+            ul
+                li <b>Scope:</b> #{val.accessor}
+                li <b>Description:</b> #{val.comment}
+            hr
+        h3.headerSpan FUNCTION DETAIL
+        each val, i in results.DocumentedMethods
+            div.methodDetail
+                h5.methodName: a(name='#{val.methodName}') #{val.methodName}
+                ul
+                    li <b>Scope:</b> #{val.accessor}
+                    li <b>Description:</b> #{val.comment}
+                        div
+                            h5.params Parameters
+                            ul
+                                each param, i in val.params
+                                    li <b> #{param.name}</b>  -  #{param.description}
+                    li <b>Returns: </b> #{val.returns}
+            hr
