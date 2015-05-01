@@ -1,0 +1,13 @@
+.headerSpan{background-color: #204d74; color: ghostwhite; padding-left: 10px;}
+.params{background-color: #d9edf7; font-size: 1.0em; margin: 2px 0;}
+.methodName{font-size: 1.2em; list-style: none;}
+.methodDetail{margin: 0 25px;}
+.docTitle{text-align: center; background-color: #204d74; color: #d9edf7}
+.indexDiv{
+    padding-left: 30px;
+    font-size: 1.2em;
+    list-style: none;
+    line-height: 1.3em;
+}
+.indexDiv a{text-decoration: none;}
+.indexDiv a:hover{text-decoration: underline;}

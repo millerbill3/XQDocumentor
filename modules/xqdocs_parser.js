@@ -1,72 +1,93 @@
 var fs = require("fs"),
-		path = require("path"),
-  		regexp = require("node-regexp");
+    path = require("path"),
+    stream = require("stream"),
+    util = require("util"),
+    docObj = require("./document"),
+    utils = require("./utils"),
+    Transform = require("stream").Transform;
 
+var unique = 0;
 module.exports = {
-	rip : function(files, enc){
-		var regexStream = new rs.RegExStream( /\w+/i );
+    rip: function (file, output_directory) {
+        console.log("Processing: " + file );
+        var indexOfFiles = [];
+        var fileName = path.basename(file);
+        var rs = fs.createReadStream(file, {encoding: 'utf8'});
 
-		// Read matches from the stream.
-		regexStream.on(
-			"readable",
-			function() {
-
-				var content = null;
-
-				// Since the RegExStream operates on "object mode", we know that we'll get a
-				// single match with each .read() call.
-				while ( content = this.read() ) {
-
-					logOutput( "Pattern match: " + content.toString( enc ) );
-
-				}
-
-			}
-		);
-
-		fs.createReadStream('./testData/crosswalk.xqy')
-		.pipe(function (chunk, enc, callback) {
-			// Write input to the stream. I am writing the input in very small chunks so that we
-			// can't rely on the fact that the entire content will be available on the first (or
-			// any single) transform function.
-			chunk.match( /.{1,3}/gi )
-				.forEach(
-					function( chunk ) {
-						console.log(chunk, enc)
-						//regexStream.write( chunk, "utf8" );
-
-					}
-				);
-			callback();
-		});
-
-		
-
-		// Close the write-portion of the stream to make sure the last write() gets flushed.
-		regexStream.end();
-				
-		// fs.createReadStream('./testData/crosswalk.xqy')
-		// .pipe(through2.obj(function (chunk, enc, callback) {
-		// 	this.push(chunk)
-
-		// 	callback()
-		// }))
-
-		// .on('data', commentMatcher)
-
-		// .on('end', function () {
-		// 	//consoleOutput(all)
-		// })
-	}
+        var ws = fs.createWriteStream(output_directory.concat("/", fileName, unique, ".json"));
+        unique++;
+        rs.pipe(new RegexStream())
+            .pipe(new DocumentObjectStream(file))
+            .pipe(ws)
+            //.pipe(process.stdout)
+            .on('finish', function () {
+                indexOfFiles.push(fileName);
+            });
+    }
 };
-var consoleOutput = function(data)
-{
-	console.log(data.toString('utf8'));
+
+//*****************************************************************************
+util.inherits(RegexStream, Transform);
+function RegexStream() {
+    if (!(this instanceof RegexStream)) {
+        return new RegexStream();
+    }
+    Transform.call(this, {"objectMode": true});
+}
+RegexStream.prototype._transform = function (data, encoding, process) {
+    var retObj = {
+        docComments: utils.extractDocumentationFromDoc(data),
+        docVars: utils.getModuleVariables(data),
+        docImports: utils.getModuleImports(data),
+        NamespaceDeclarations: utils.getNamespaceDeclarations(data),
+        Imports: utils.getModuleImports(data),
+        ModuleDescription : utils.getModuleDescription(data)
+    }
+    this.push(retObj)
+    process();
 }
 
-var commentMatcher = function(data)
-{
-	console.log(data.toString('utf8'));
-	//regex to match comment and associated function definition
-	//^(\(:~\n[\s]+:[\w\s:\@\$-]+:\))[\n\s]+(declare\s+[\w\s]*:[\w\s-_]*\([\$\w-\s:,\(\)]*)
+//*****************************************************************************
+// Create Document Object from extracted content
+util.inherits(DocumentObjectStream, Transform);
+function DocumentObjectStream(fName) {
+    var FName = path.basename(fName);
+    if (!(this instanceof DocumentObjectStream))
+        return new DocumentObjectStream(FName);
+    this.fileName = FName;
+    this.filePath = fName;
+    Transform.call(this, {"objectMode": true});
 }
+DocumentObjectStream.prototype._transform = function (data, encoding, process) {
+    var doc = new docObj.Document(this.fileName);
+    doc.FileSystemPath = this.filePath;
+    doc.Variables = data.docVars;
+    doc.NameSpaceDeclarations = data.NamespaceDeclarations;
+    doc.Imports = data.Imports;
+    doc.ModuleDescription = data.ModuleDescription;
+
+    data.docComments.forEach(function (comment) {
+        var method = new docObj.Method();
+        var methodDescriptor = utils.getMethodFromComment(comment);
+        var methodParams = utils.getMethodParameters(comment);
+        if (methodParams)
+            methodParams.forEach(function (param) {
+                var p = new docObj.Param();
+                p.name = param["param"];
+                p.description = param["description"];
+                method.params.push(p);
+            })
+        method.comment = utils.getMethodComment(comment);
+        method.accessor = methodDescriptor[1] === "" ? "public" : methodDescriptor[1];
+        method.methodName = methodDescriptor[2];
+        method.returns = utils.getMethodReturn(comment);
+
+        doc.DocumentedMethods.push(method);
+
+    });
+
+    this.push(JSON.stringify(doc));
+    process();
+}
+
+

@@ -1,0 +1,12 @@
+#Ignore mode libraries
+node_modules
+
+#Ignore Test Data Directory
+/testData/*
+
+#Ignore output directory
+/output/*
+
+#Specific file ignores
+project.tasks
+.idea*

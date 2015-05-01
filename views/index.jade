@@ -1,0 +1,11 @@
+doctype html
+html
+   head
+      title!= "List of Files processed"
+      <link rel="stylesheet" type="text/css" href="/style.css" />
+   body
+      h1!= "List of XQDocs Generated"
+   div.indexDiv
+      ul
+      each val, i in results
+         li: a(href= val.link) #{val.filename}
