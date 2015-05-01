@@ -16,6 +16,7 @@ The application will prompt you step-by-step to provide the required information
   1. Provide path to directory containing your source files (.xqy)
   2. If applicable, provide any sub-directories you wish to exclude from evaluation
   3. Provide a directory where generated output files used for extracted content should be placed. Defaults to *./output*
+     * NOTE!!! The directory specified will have all content removed during processing to ensure only current/updated content is listed after processing. Please choose wisely.
 
 Once processing is complete, the web server will be started and listening on port 3000. You may view the generated output by going to *http://localhost:3000* in your web browser. The page presented will list all the files that were parsed and have documentation generated with a link to each file.
 
