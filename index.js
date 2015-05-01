@@ -84,20 +84,14 @@ inquirer.prompt(questions,
 
         walker.walk(answers["dir_to_inspect"], exclusionDirectories, function (err, results) {
             if (err) {
-                console.log(err)
+                console.log(err);
                 throw err;
             }
-
-            //results.forEach(function (file) {
-            //    parser.rip(file, answers["output_directory"]);
-            //});
         });
 
     });
 
 function StartParsing(files, output_directory){
-    //if (!fs.existsSync(output_directory))
-    //    fs.mkdirSync(output_directory);
 
     files.forEach(function (file) {
         parser.rip(file, output_directory);
@@ -119,8 +113,6 @@ function writeIndexFile(output_directory) {
         retArray.push(obj);
     });
 
-    console.log(retArray);
-
     fs.writeFile(output_directory+"/rootIndex.json", JSON.stringify(retArray), function(err) {
         if(err) {
             return console.log(err);
@@ -129,7 +121,6 @@ function writeIndexFile(output_directory) {
 }
 
 function cleanOutputDir(dir){
-    console.log(dir);
     fs.readdirSync(dir).forEach(function(fileName) {
         fs.unlinkSync(path.join(dir, fileName));
     });

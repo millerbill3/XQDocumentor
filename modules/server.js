@@ -26,9 +26,7 @@ module.exports = {
         //app.use(express.static(outputDir));
 
         app.get('/output/:file', function(req, res){
-            console.log(req.params.file);
             var retData = JSON.parse(fs.readFileSync(path.join(rootDir,jsonDirectory, req.params.file), 'utf8'));
-            console.log(retData);
             res.render(path.join(views,"module_view"),{results: retData, outputDirectory:path.join(rootDir,jsonDirectory)} );
         });
 

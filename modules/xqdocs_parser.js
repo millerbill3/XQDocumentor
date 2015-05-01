@@ -13,13 +13,11 @@ module.exports = {
         var indexOfFiles = [];
         var fileName = path.basename(file);
         var rs = fs.createReadStream(file, {encoding: 'utf8'});
-
         var ws = fs.createWriteStream(output_directory.concat("/", fileName, unique, ".json"));
         unique++;
         rs.pipe(new RegexStream())
             .pipe(new DocumentObjectStream(file))
             .pipe(ws)
-            //.pipe(process.stdout)
             .on('finish', function () {
                 indexOfFiles.push(fileName);
             });

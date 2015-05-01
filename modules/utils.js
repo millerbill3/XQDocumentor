@@ -141,8 +141,6 @@ module.exports = {
 				namespaceObj["uri"] = namespaceRegEx.exec(code)[2];
 				retObj["namespace"] = namespaceRegEx.test(code) ? namespaceObj : "";
 			}
-
-			//console.log(retObj);
 		}
 		return retObj;
 	}
