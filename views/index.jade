@@ -4,8 +4,20 @@ html
       title!= "List of Files processed"
       <link rel="stylesheet" type="text/css" href="/style.css" />
    body
-      h1!= "List of XQDocs Generated"
+      div.docTitle
+         h1 List of XQDocs Generated
+   div.index
+      | Number of files parsed: #{results.number} <br />
+      | Directories Excluded: #{results.exclusionDirs}
    div.indexDiv
-      ul
-      each val, i in results
-         li: a(href= val.link) #{val.filename}
+      table
+         tr
+            th File Location
+            th File
+         each val, i in results.files
+            tr
+               td= val.filePath
+               td: a(href= val.jsonPath) #{val.fileName}
+
+   div.docFooter
+      |Created by XQDocumenter version 1.0.0 on #{moment().format('MM/DD/YYYY')}

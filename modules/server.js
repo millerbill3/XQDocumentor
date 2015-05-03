@@ -3,11 +3,13 @@ var app = express(),
 	http = require('http'),
   	path = require('path'),
     fs = require('fs'),
+
     bodyParser = require('body-parser');
 
 module.exports = {
 	startServer : function(port, rootDir, jsonDirectory){
         var assignedPort = process.env.PORT || port || 3000;
+        app.locals.moment = require('moment');
         app.set('port', assignedPort);
         app.set('views', __dirname + '/views');
         app.set('view engine', 'jade');

@@ -34,12 +34,12 @@ var questions = [
         type: "input",
         name: "dirs_to_exclude",
         default: [],
-        message: "Provide one or more directies to exdlude from processing (comma separated):",
+        message: "Provide one or more directories to exclude from processing (comma separated):",
         when: function (answers) {
             return answers["has_exclusion_directory"]
         },
         validate: function (dir) {
-            var directories = dir.split(',')
+            var directories = dir.split(',');
             directories.forEach(function (dir) {
                 try {
                     fs.statSync(dir).isDirectory()
@@ -47,7 +47,7 @@ var questions = [
                 catch (er) {
                     return "Directory '" + dir + "'' provided does not exist."
                 }
-            })
+            });
             return true;
         },
         filter: function (val) {
@@ -58,7 +58,7 @@ var questions = [
         type: "input",
         name: "output_directory",
         message: "Provide directory where output files should go:",
-        default: "./output"
+        default: path.normalize("./output")
     }
 ];
 
@@ -73,13 +73,7 @@ inquirer.prompt(questions,
             cleanOutputDir(answers["output_directory"]);
 
         walker.on('DoneWalking', function(files, data) {
-            StartParsing(files,answers["output_directory"]);
-            writeIndexFile(answers["output_directory"]);
-            console.log();
-            console.log("***************************************");
-            console.log("************ DONE PROCESSING **********");
-            console.log("***************************************");
-            startWebServer(answers["output_directory"]);
+            StartParsing(files, answers["output_directory"], answers["dirs_to_exclude"]);
         });
 
         walker.walk(answers["dir_to_inspect"], exclusionDirectories, function (err, results) {
@@ -91,29 +85,30 @@ inquirer.prompt(questions,
 
     });
 
-function StartParsing(files, output_directory){
-
-    files.forEach(function (file) {
-        parser.rip(file, output_directory);
-    });
+function StartParsing(files, output_directory, exclusionDirs){
+     var ripper = new parser();
+     ripper.rip(files, output_directory);
+     ripper.on("DoneProcessing",function(data){
+        console.log();
+        console.log("***************************************");
+        console.log("************ DONE PROCESSING **********");
+        console.log("***************************************");
+        writeIndexFile(output_directory, data, exclusionDirs);
+        startWebServer(output_directory);
+     });
 }
 function startWebServer(outputDirectory) {
     server.startServer(3000, __dirname, outputDirectory);
 };
 
-function writeIndexFile(output_directory) {
-    var retArray = [];
-    var rippedFileNames = fs.readdirSync(output_directory);
-    rippedFileNames.sort();
+function writeIndexFile(output_directory, files, exclusionDirs) {
+    files.sort(indexSort);
+    var indexData = {};
+    indexData["files"] = files;
+    indexData["number"] = files.length;
+    indexData["exclusionDirs"] = exclusionDirs ? exclusionDirs : "None";
 
-    rippedFileNames.forEach(function (fileName) {
-        var obj = {};
-        obj["link"] = "./"+path.join(output_directory, fileName);
-        obj["filename"] = path.basename(fileName).replace(/\d+\.json$/, ".json");
-        retArray.push(obj);
-    });
-
-    fs.writeFile(output_directory+"/rootIndex.json", JSON.stringify(retArray), function(err) {
+    fs.writeFile(output_directory+"/rootIndex.json", JSON.stringify(indexData), function(err) {
         if(err) {
             return console.log(err);
         }
@@ -124,4 +119,13 @@ function cleanOutputDir(dir){
     fs.readdirSync(dir).forEach(function(fileName) {
         fs.unlinkSync(path.join(dir, fileName));
     });
+}
+
+function indexSort(a,b)
+{
+    if (a.filePath < b.filePath)
+        return -1;
+    if (a.filePath > b.filePath)
+        return 1;
+    return 0;
 }

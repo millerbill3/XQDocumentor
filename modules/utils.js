@@ -5,12 +5,17 @@ module.exports = {
 			return document.match(regex);
 		else return [];
 	},
-	extractDocumentedMethods : function(rawComment){
-		var documentedMethods = [];
-				this.comments.forEach(function(item){
-					documentedMethods.push(methodMatcher(item))
-				});
-		return documentedMethods
+	getAllMethods : function(code){
+		var allmethods = [];
+		var regex = new RegExp("declare\\s+((?:private\\s+)?)function\\s+([\\w\\-]*:[\\w\\-\\_]*)[\\(\\$\\w\\-\\_\\s:,\\+\\*\\(\\)]+\\)+","ig");
+		if(regex.test(code)){
+			var regex2 = new RegExp("declare\\s+((?:private\\s+)?)function\\s+([\\w\\-]*:[\\w\\-\\_]*)[\\(\\$\\w\\-\\_\\s:,\\+\\*\\(\\)]+\\)+","ig");
+			while (matches = regex2.exec( code )) {
+				allmethods.push(matches[2]);
+			}
+
+		}
+		return allmethods
 	},
 	getMethodFromComment : function(comment){
 		var regex = new RegExp("declare\\s+((?:private\\s+)?)function\\s+([\\w\\-]*:[\\w\\-\\_]*)[\\(\\$\\w\\-\\_\\s:,\\+\\*\\(\\)]+\\)+","i")
@@ -104,6 +109,7 @@ module.exports = {
 	},
 	getModuleDescription : function(code){
 		var retObj = {};
+
 		var regex = new RegExp("^(?:\\(:~)([\\s:\\w\\.\\,\\/\\'\\@]+)(?:\\)\\s+module\\s+namespace\\s+crosswalk)", "im");
 		if(regex.test(code))
 		{
@@ -132,19 +138,31 @@ module.exports = {
 			//Get See Value
 			var seeRegEx = new RegExp("(@see)([\\s\\w\\,\\'\\=\\:]+)","im");
 			retObj["see"] = seeRegEx.test(modDesc) ? seeRegEx.exec(modDesc)[2].replace("\n", "").replace(":","") : "";
-
-			//Get Module Namespace
-			var namespaceRegEx = new RegExp("(?:module\\s+namespace\\s+)([\\w\\_\\-]+)(?:[\\s\\=\\\"]*)([\\w\\s\\:\\/\\.\\-\\\"]+)","im");
-			if(namespaceRegEx.test(code)){
-				var namespaceObj = {};
-				namespaceObj["name"] = namespaceRegEx.exec(code)[1];
-				namespaceObj["uri"] = namespaceRegEx.exec(code)[2];
-				retObj["namespace"] = namespaceRegEx.test(code) ? namespaceObj : "";
-			}
 		}
 		return retObj;
+	},
+	getModuleNamespaceDeclaration : function(code){
+		var retObj = {};
+		var namespaceRegEx = new RegExp("(?:module\\s+namespace\\s+)([\\w\\_\\-]+)(?:[\\s\\=\\\"]*)([\\w\\s\\:\\/\\.\\-\\\"]+)","im");
+		if(namespaceRegEx.test(code)){
+			var namespaceObj = {};
+			namespaceObj["name"] = namespaceRegEx.exec(code)[1];
+			namespaceObj["uri"] = namespaceRegEx.exec(code)[2];
+			retObj["namespace"] = namespaceRegEx.test(code) ? namespaceObj : "";
+		}
+		return retObj;
+	},
+	getUndocumentedMethods : function(allMethods, documentedMethods){
+		var methodNames = [];
+		documentedMethods.forEach(function(item){
+			methodNames.push(item.methodName);
+		});
+		undocmentedMethods = allMethods.filter( function( method ) {
+			return methodNames.indexOf( method ) < 0;
+		});
+		return undocmentedMethods;
 	}
 };
 String.prototype.startsWith = function(prefix) {
 	return this.indexOf(prefix) === 0;
-}
+};

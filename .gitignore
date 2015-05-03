@@ -3,6 +3,7 @@ node_modules
 
 #Ignore Test Data Directory
 /testData/*
+/test/*
 
 #Ignore output directory
 /output/*

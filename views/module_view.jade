@@ -6,9 +6,9 @@ html
     body
         div.docTitle
             h1= results.FileName
-            h2= results.FileSystemPath
         div.index
-            a(href='/') Home
+            a(href='/') Back to List <br />
+            <b>Path:</b> #{results.FileSystemPath}
         unless results.ModuleDescription.namespace == null
             h3.headerSpan MODULE URI
             div
@@ -17,9 +17,12 @@ html
                         li <b> Name: </b> #{results.ModuleDescription.namespace.name}
                     unless results.ModuleDescription.namespace == null
                         li <b>URI = </b> #{results.ModuleDescription.namespace.uri}
+
         h3.headerSpan= "MODULE DESCRIPTION"
         div= results.ModuleDescription.modDesc
         ul
+            unless results.ModuleNamespace instanceof Object
+                li <b>Namespace:</b> #{results.ModuleNamespace.namespace.name} <b>URI</b> #{results.ModuleNamespace.namespace.uri}
             unless results.ModuleDescription.author == ""
                 li <b> Author: </b> #{results.ModuleDescription.author}
             unless results.ModuleDescription.version == ""
@@ -28,14 +31,18 @@ html
                 li <b> Since: </b> #{results.ModuleDescription.since}
             unless results.ModuleDescription.see == ""
                 li <b> See: </b> #{results.ModuleDescription.see}
+
         h3.headerSpan MODULE VARIABLES
         div.methodDetail
             ul
             each val, i in results.Variables
                 li #{val.variable}
-                    unless val.comment == null
+                    ul
+                    if val.comment != null
+                        li= val.comment
+                    else
                         ul
-                            li= val.comment
+                            li.nobullet No documentation available
                 hr
 
         h3.headerSpan NAMESPACE DECLARATIONS
@@ -44,24 +51,35 @@ html
             unless results.NameSpaceDeclarations.length == 0
                 each val, i in results.NameSpaceDeclarations
                     li <b>Namespace:</b> #{val.namespace}
-                    li <b>URN:</b> #{val.urn}
+                        ul
+                            li <b>URN:</b> #{val.urn}
                     hr
+
         h3.headerSpan MODULE IMPORTS
         div.methodDetail
             ul
             unless results.Imports == null
                 each val, i in results.Imports
                     li <b>Namespace:</b> #{val.namespace}
-                    li <b>URN:</b> #{val.urn}
-                    li <b>Location:</b> #{val.location}
+                        ul
+                            li <b>URN:</b> #{val.urn}
+                            li <b>Location:</b> #{val.location}
                     hr
-        h3.headerSpan FUNCTIONS
+
+        h3.headerSpan DOCUMENTED FUNCTIONS
         each val, i in results.DocumentedMethods
             li: a(href='##{val.methodName}') #{val.methodName}
             ul
                 li <b>Scope:</b> #{val.accessor}
                 li <b>Description:</b> #{val.comment}
             hr
+        unless results.UndocumentedMethods.length === 0
+            h3.headerSpan UNDOCUMENTED FUNCTIONS
+            div.methodDetail
+                h4 These functions are defined within the document, but have no corresponding comment or documentation.
+                each val, i in results.UndocumentedMethods
+                    li #{val}
+
         h3.headerSpan FUNCTION DETAIL
         each val, i in results.DocumentedMethods
             div.methodDetail
@@ -76,3 +94,5 @@ html
                                     li <b> #{param.name}</b>  -  #{param.description}
                     li <b>Returns: </b> #{val.returns}
             hr
+        div.docFooter
+            |Created by XQDocumenter version 1.0.0 on #{moment().format('MM/DD/YYYY')}

@@ -5,6 +5,7 @@ module.exports = {
 		this.UndocumentedMethods = [];
 		this.Variables = [];
 		this.ModuleDescription = "";
+		this.ModuleNamespace = "";
 		this.Imports = [];
 		this.NameSpaceDeclarations = [];
 		this.FileSystemPath = "";

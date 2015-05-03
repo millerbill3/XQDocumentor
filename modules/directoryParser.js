@@ -15,8 +15,6 @@ function Walker(){
 
 util.inherits(Walker, EventEmitter);
 
-
-
 Walker.prototype.walk = function(dir, exclusionDirs, done) {
     var files_to_return = [];
     var walkerEmitter = this;
@@ -27,7 +25,6 @@ Walker.prototype.walk = function(dir, exclusionDirs, done) {
     console.log();
     walker(dir)
         .on('dir', function(p) {
-            //console.log('dir:  %s', p);
         })
         .on('file', function(p, s, absPath) {
             if (!processExclusionDirectory(exclusionDirs, absPath) && stringUtil(p).endsWith(".xqy")) {
@@ -38,24 +35,20 @@ Walker.prototype.walk = function(dir, exclusionDirs, done) {
             console.error(err);
         })
         .on('done', function() {
-            //console.log('%d dirs, %d files, %d bytes', this.dirs, this.files, this.bytes);
             walkerEmitter.emit("DoneWalking", files_to_return);
         })
         .walk();
-
-
 };
 
 
 var processExclusionDirectory = function (dirs, path) {
     var found = false;
     dirs.forEach(function (filePath) {
-        if (stringUtil(path).contains(filePath)) {
+        if (stringUtil(path).contains(filePath.trim())) {
             found = true;
             return;
         }
     });
-    //console.log(found)
     return found;
 };
 module.exports = Walker;

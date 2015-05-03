@@ -4,18 +4,22 @@
   "description": "A simple application to parse .xqy files and extract the files documentation (similar to JavaDocs). Documentation can then be viewed in your web browser.",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.12.3",
-    "node-regexp": "^0.1.1",
-    "string": "^3.0.0",
     "body-parser": "^1.12.2",
-    "inquirer": "^0.8.0",
+    "express": "^4.12.3",
     "filewalker": "^0.1.2",
+    "inquirer": "^0.8.0",
     "jade": "^1.9.2",
+    "moment": "^2.10.2",
+    "node-regexp": "^0.1.1",
     "regex": "^0.1.1",
-    "transform-split": "^1.0.4",
-    "stringify-object": "^1.0.1"
+    "string": "^3.0.0",
+    "stringify-object": "^1.0.1",
+    "transform-split": "^1.0.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^2.2.4",
+    "should": "^6.0.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
