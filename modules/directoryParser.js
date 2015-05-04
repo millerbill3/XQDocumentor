@@ -1,5 +1,4 @@
-var fs = require("fs"),
-    path = require("path"),
+var path = require("path"),
     stringUtil = require("string"),
     util = require("util"),
     EventEmitter = require("events").EventEmitter,

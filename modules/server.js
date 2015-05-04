@@ -2,9 +2,7 @@ var express = require('express');
 var app = express(),
 	http = require('http'),
   	path = require('path'),
-    fs = require('fs'),
-
-    bodyParser = require('body-parser');
+    fs = require('fs');
 
 module.exports = {
 	startServer : function(port, rootDir, jsonDirectory){

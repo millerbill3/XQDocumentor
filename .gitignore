@@ -1,6 +1,3 @@
-#Ignore mode libraries
-node_modules
-
 #Ignore Test Data Directory
 /testData/*
 /test/*
